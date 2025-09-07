@@ -1,0 +1,95 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nginx-config
+  namespace: homework
+  annotations:
+    cpaas.io/creator: vyshegorodskiysp
+data:
+  nginx.conf: |
+    user nginx;
+    worker_processes auto;
+    error_log  /homework/nginx.error.log error;
+
+    events {
+      use epoll;
+      worker_connections 128;
+    }
+
+    http {
+      server {
+        listen 8000;
+        root /homework;
+        index index.html;
+        charset utf-8;
+        access_log /homework/access-nginx.log combined;
+      }
+    }
+---
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nginx
+  namespace: homework
+spec:
+  initContainers:
+  - name: init-container
+    image: busybox:1.37.0-glibc
+    command: ['sh', '-c', 'echo "<html><body>Nginx is alive!</body></html>" >/init/index.html']
+    resources:
+      requests:
+        memory: 100Mi
+        cpu: 100m
+      limits:
+        memory: 300Mi
+        cpu: 300m
+    volumeMounts:
+    - name: shared-data
+      mountPath: /init
+  containers:
+  - name: nginx
+    image: nginx:alpine3.22-perl
+    ports:
+    - containerPort: 8000
+    resources:
+      requests:
+        memory: 100Mi
+        cpu: 100m
+      limits:
+        memory: 300Mi
+        cpu: 300m
+    lifecycle:
+      preStop:
+        exec:
+          command: ["rm", "/homework/index.html"]
+    volumeMounts:
+    - name: shared-data
+      mountPath: /homework
+    - name: nginx-config
+      mountPath: /etc/nginx/
+  volumes:
+  - name: shared-data
+    emptyDir: {}
+  - name: nginx-config
+    configMap:
+      name: nginx-config
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx
+  namespace: homework
+  annotations:
+    cpaas.io/creator: vyshegorodskiysp
+  labels:
+    name: nginx
+spec:
+  ports:
+    - name: http
+      port: 8000
+      targetPort: 8000
+      protocol: TCP
+  selector:
+    name: nginx
