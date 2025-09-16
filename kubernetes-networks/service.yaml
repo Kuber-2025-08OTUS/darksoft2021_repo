@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx
+  namespace: homework
+  annotations:
+    cpaas.io/creator: vyshegorodskiysp
+  labels:
+    name: nginx
+spec:
+  ports:
+    - name: http
+      port: 8000
+      targetPort: 8000
+      protocol: TCP
+  selector:
+    name: nginx
