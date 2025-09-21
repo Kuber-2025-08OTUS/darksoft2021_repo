@@ -1,0 +1,22 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: common-configmap
+  namespace: homework
+  annotations:
+    cpaas.io/creator: vyshegorodskiysp
+data:
+  ARGOCD_URL: "argocd.homework"
+  BACKEND_URL: "backend.homework"
+  GITLAB_URL: "gitlab.homework"
+  MINIO_HOST: "minio.homework"
+  MINIO_PORT: "9000"
+  KEYCLOAK_URL: "keycloak.homework"
+  POSTGRES_HOST: "172.30.52.201"
+  POSTGRES_PORT: "15241"
+  REDIS_HOST: "redis"
+  REDIS_PORT: "6379"
+  RABBITMQ_HOST: "rabbitmq.homework"
+  RABBITMQ_PORT: "5672"
+  TIMEZONE: "Europe/Moscow"
+  UI_URL: "frontend.homework"
